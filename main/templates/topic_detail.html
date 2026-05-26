@@ -117,7 +117,7 @@
                 <ul class="presentations-list">
                     {% for pres in presentations %}
                         <li>
-                            <a href="{{ pres.url }}" target="_blank" rel="noopener">{{ pres.title }}</a>
+                            <a href="{% static 'main/presentations/' %}{{ pres.filename }}" target="_blank" rel="noopener">{{ pres.title }}</a>
                         </li>
                     {% endfor %}
                 </ul>
