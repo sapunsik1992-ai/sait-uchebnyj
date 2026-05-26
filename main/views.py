@@ -123,12 +123,11 @@ def topic_detail(request, module_id, topic_id):
     if not topic:
         raise Http404('Тема не найдена')
     
-    # Добавляем URL к презентациям
     presentations = []
     for pres in topic['presentations']:
         presentations.append({
             'title': pres['title'],
-            'url': settings.MEDIA_URL + 'presentations/module1/' + pres['filename'],
+            'filename': pres['filename'],
         })
     
     return render(request, 'topic_detail.html', {'module': module, 'topic': topic, 'presentations': presentations})
