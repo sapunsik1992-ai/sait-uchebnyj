@@ -23,7 +23,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-0k8nmhquuqruza18*d10d8ge%3oi^hgiqex#nsa9s)dmazyx^q'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True  # temporarily enable for debugging deploy issue; will revert after fix
 
 # Allow render domain and its subdomains
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '.onrender.com', 'sait-uchebnyj.onrender.com']
