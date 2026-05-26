@@ -88,6 +88,28 @@
             color: #333;
             line-height: 1.6;
         }
+        .image-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+        }
+        .image-card {
+            background: #fff;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            text-align: center;
+        }
+        .image-card img {
+            width: 100%;
+            height: auto;
+            border-radius: 6px;
+            margin-bottom: 10px;
+        }
+        .image-card p {
+            font-size: 14px;
+            color: #555;
+        }
         footer {
             text-align: center;
             padding: 20px;
@@ -129,6 +151,20 @@
                 <h2>ℹ️ Информация</h2>
                 <div class="info-box">
                     {{ topic.info|safe }}
+                </div>
+            </div>
+        {% endif %}
+
+        {% if topic.images %}
+            <div class="content-section">
+                <h2>🖼️ Иллюстрации</h2>
+                <div class="image-gallery">
+                    {% for image in topic.images %}
+                        <div class="image-card">
+                            <img src="{{ image.src }}" alt="{{ image.caption }}">
+                            <p>{{ image.caption }}</p>
+                        </div>
+                    {% endfor %}
                 </div>
             </div>
         {% endif %}
