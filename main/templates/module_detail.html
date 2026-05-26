@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ module.title }}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        .header {
+            background-color: #1a1a2e;
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 10px 20px;
+            background-color: #16a085;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        .back-link:hover {
+            background-color: #138d75;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+        .topics-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        .topic-card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            text-decoration: none;
+            color: #333;
+            transition: transform 0.3s, box-shadow 0.3s;
+            border-left: 4px solid #3498db;
+        }
+        .topic-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        .topic-card h3 {
+            color: #1a1a2e;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        .topic-card p {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        footer {
+            text-align: center;
+            padding: 20px;
+            background-color: #333;
+            color: white;
+            margin-top: 40px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>{{ module.title }}</h1>
+        <p>{{ module.description }}</p>
+        <a href="{% url 'module_list' %}" class="back-link">← Назад к модулям</a>
+    </div>
+
+    <div class="container">
+        <h2 style="text-align: center; margin-bottom: 30px;">Темы модуля</h2>
+        <div class="topics-list">
+            {% for topic in module.topics %}
+                <a href="{% url 'topic_detail' module.id topic.id %}" class="topic-card">
+                    <h3>{{ topic.title }}</h3>
+                    <p>{{ topic.description }}</p>
+                    <p style="margin-top: 10px; font-style: italic; color: #3498db;">
+                        → Перейти к теме
+                    </p>
+                </a>
+            {% endfor %}
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 Учебный портал. Все права защищены.</p>
+    </footer>
+</body>
+</html>
