@@ -1,5 +1,5 @@
 from django.contrib import admin
-from main.models import Module, Topic, Presentation, TopicImage, Product
+from main.models import Module, Topic, Presentation, TopicImage, Product, AssistantMessage
 
 
 class TopicInline(admin.StackedInline):
