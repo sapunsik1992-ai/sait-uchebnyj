@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
@@ -8,6 +9,8 @@ from django.http import Http404, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.views.decorators.http import require_POST
 from main.models import AssistantMessage, Module, Topic, Product
+
+logger = logging.getLogger(__name__)
 
 
 def test_page(request):
@@ -114,10 +117,17 @@ def call_openai_assistant(question, api_key):
         response_data = json.loads(response.read().decode('utf-8'))
         return response_data['choices'][0]['message']['content'].strip()
     except HTTPError as exc:
+        try:
+            body = exc.read().decode('utf-8')
+        except Exception:
+            body = '<no response body>'
+        logger.error('OpenAI HTTPError %s: %s', exc.code, body)
         return 'Не удалось подключиться к внешнему помощнику. Использую локальный режим.'
     except URLError as exc:
+        logger.error('OpenAI URLError: %s', exc)
         return 'Сеть недоступна. Использую локальный помощник.'
-    except Exception:
+    except Exception as exc:
+        logger.exception('OpenAI request failed')
         return 'Ошибка внешнего AI. Использую локальный помощник.'
 
 
