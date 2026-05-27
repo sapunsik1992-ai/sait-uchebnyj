@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Админ-помощник</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background: #f4f7fb;
+            color: #222;
+        }
+        .hero {
+            background: linear-gradient(135deg, #4a90e2 0%, #1a1a2e 100%);
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+        }
+        .hero h1 {
+            margin-bottom: 12px;
+            font-size: 36px;
+        }
+        .hero p {
+            max-width: 800px;
+            margin: 0 auto;
+            font-size: 18px;
+            line-height: 1.6;
+        }
+        .content {
+            max-width: 940px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+        .card {
+            background: white;
+            border-radius: 18px;
+            box-shadow: 0 16px 40px rgba(21, 33, 62, 0.08);
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+        .card h2 {
+            margin-bottom: 16px;
+            color: #1a1a2e;
+        }
+        .card p {
+            line-height: 1.8;
+            color: #444;
+        }
+        .card ul {
+            margin-left: 18px;
+            list-style: disc;
+            color: #444;
+        }
+        .card ul li {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="hero">
+        <h1>Локальный помощник сайта</h1>
+        <p>Этот чат-помощник поможет разобраться с админкой, добавлением модулей, тем и медиа, а также с учебным материалом.</p>
+    </div>
+    <div class="content">
+        <div class="card">
+            <h2>Как пользоваться</h2>
+            <p>Нажмите кнопку чата в правом нижнем углу и задайте вопрос. Например:</p>
+            <ul>
+                <li>Как добавить модуль?</li>
+                <li>Как создать тему и загрузить презентацию?</li>
+                <li>Что изменить в админке, чтобы урок стал доступным?</li>
+            </ul>
+        </div>
+        <div class="card">
+            <h2>Полезные советы</h2>
+            <p>Если хотите сделать урок лучше, добавляйте:</p>
+            <ul>
+                <li>краткое описание темы;</li>
+                <li>полезную информацию в поле «info»;</li>
+                <li>презентацию и изображения;</li>
+                <li>проверяйте, что порядок тем <strong>order</strong> заполнен.</li>
+            </ul>
+        </div>
+    </div>
+    {% include 'assistant_widget.html' %}
+</body>
+</html>

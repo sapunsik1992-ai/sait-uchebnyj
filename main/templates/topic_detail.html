@@ -138,9 +138,11 @@
                 <h2>📄 Презентации</h2>
                 <ul class="presentations-list">
                     {% for pres in presentations %}
-                        <li>
-                            <a href="{% static 'main/presentations/' %}{{ pres.filename }}" target="_blank" rel="noopener">{{ pres.title }}</a>
-                        </li>
+                        {% if pres.file %}
+                            <li>
+                                <a href="{{ pres.file.url }}" target="_blank" rel="noopener">{{ pres.title }}</a>
+                            </li>
+                        {% endif %}
                     {% endfor %}
                 </ul>
             </div>
@@ -155,15 +157,17 @@
             </div>
         {% endif %}
 
-        {% if topic.images %}
+        {% if images %}
             <div class="content-section">
                 <h2>🖼️ Иллюстрации</h2>
                 <div class="image-gallery">
-                    {% for image in topic.images %}
-                        <div class="image-card">
-                            <img src="{{ image.src }}" alt="{{ image.caption }}">
-                            <p>{{ image.caption }}</p>
-                        </div>
+                    {% for image in images %}
+                        {% if image.image %}
+                            <div class="image-card">
+                                <img src="{{ image.image.url }}" alt="{{ image.caption }}">
+                                <p>{{ image.caption }}</p>
+                            </div>
+                        {% endif %}
                     {% endfor %}
                 </div>
             </div>
@@ -176,6 +180,12 @@
             </div>
         </div>
     </div>
+
+    <div class="page-actions" style="max-width: 1000px; margin: 20px auto; display: flex; gap: 12px; justify-content: center;">
+        <a href="{{ admin_url }}" class="page-action-button">Админка</a>
+        <a href="{{ assistant_url }}" class="page-action-button">Помощник</a>
+    </div>
+    {% include 'assistant_widget.html' %}
 
     <footer>
         <p>&copy; 2026 Учебный портал. Все права защищены.</p>

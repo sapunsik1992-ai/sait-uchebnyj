@@ -1,0 +1,177 @@
+<div id="assistant-widget" class="assistant-widget">
+    <div class="assistant-handle">
+        <span>Помощник</span>
+        <button id="assistant-toggle" type="button">💬</button>
+    </div>
+    <div id="assistant-panel" class="assistant-panel hidden">
+        <div class="assistant-header">Чат-помощник</div>
+        <div id="assistant-messages" class="assistant-messages">
+            <div class="assistant-message assistant-bot">Привет! Задай вопрос про сайт, админку или уроки.</div>
+        </div>
+        <form id="assistant-form" class="assistant-form">
+            <input id="assistant-input" type="text" placeholder="Напиши вопрос..." autocomplete="off" />
+            <button type="submit">Отправить</button>
+        </form>
+    </div>
+</div>
+<style>
+    .assistant-widget {
+        position: fixed;
+        right: 20px;
+        bottom: 20px;
+        z-index: 9999;
+        width: 320px;
+        max-width: calc(100% - 40px);
+        font-family: Arial, sans-serif;
+    }
+    .assistant-handle {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: #1a1a2e;
+        color: white;
+        padding: 12px 16px;
+        border-radius: 16px;
+        cursor: pointer;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+    .assistant-panel {
+        margin-top: 10px;
+        background: white;
+        border-radius: 18px;
+        overflow: hidden;
+        box-shadow: 0 14px 40px rgba(0, 0, 0, 0.18);
+        display: flex;
+        flex-direction: column;
+        height: 420px;
+    }
+    .assistant-panel.hidden {
+        display: none;
+    }
+    .assistant-header {
+        background: #2c3e50;
+        color: white;
+        padding: 14px 16px;
+        font-weight: bold;
+    }
+    .assistant-messages {
+        padding: 16px;
+        overflow-y: auto;
+        flex: 1;
+        background: #f7f9fc;
+    }
+    .assistant-message {
+        margin-bottom: 12px;
+        padding: 12px 14px;
+        border-radius: 14px;
+        line-height: 1.5;
+    }
+    .assistant-bot {
+        background: #e8f0ff;
+        color: #1a1a2e;
+    }
+    .assistant-user {
+        background: #1a1a2e;
+        color: white;
+        align-self: flex-end;
+    }
+    .assistant-form {
+        display: flex;
+        gap: 10px;
+        padding: 14px;
+        background: #fff;
+        border-top: 1px solid #e1e5ee;
+    }
+    .assistant-form input {
+        flex: 1;
+        padding: 10px 12px;
+        border-radius: 12px;
+        border: 1px solid #ccd6e0;
+        outline: none;
+        font-size: 14px;
+    }
+    .assistant-form button {
+        background: #3498db;
+        color: white;
+        border: none;
+        border-radius: 12px;
+        padding: 10px 16px;
+        cursor: pointer;
+        font-weight: bold;
+    }
+    .assistant-form button:hover {
+        background: #2c81b7;
+    }
+</style>
+<script>
+(function() {
+    var panel = document.getElementById('assistant-panel');
+    var toggle = document.getElementById('assistant-toggle');
+    var form = document.getElementById('assistant-form');
+    var input = document.getElementById('assistant-input');
+    var messages = document.getElementById('assistant-messages');
+
+    if (!panel || !toggle || !form || !input || !messages) {
+        return;
+    }
+
+    function getCookie(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    toggle.addEventListener('click', function() {
+        panel.classList.toggle('hidden');
+    });
+
+    form.addEventListener('submit', function(event) {
+        event.preventDefault();
+        var text = input.value.trim();
+        if (!text) {
+            return;
+        }
+        var userMessage = document.createElement('div');
+        userMessage.className = 'assistant-message assistant-user';
+        userMessage.textContent = text;
+        messages.appendChild(userMessage);
+        messages.scrollTop = messages.scrollHeight;
+        input.value = '';
+
+        var botMessage = document.createElement('div');
+        botMessage.className = 'assistant-message assistant-bot';
+        botMessage.textContent = 'Думаю...';
+        messages.appendChild(botMessage);
+        messages.scrollTop = messages.scrollHeight;
+
+        fetch('/assistant/api/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: 'question=' + encodeURIComponent(text)
+        })
+            .then(function(response) {
+                return response.json();
+            })
+            .then(function(data) {
+                botMessage.textContent = data.answer;
+                messages.scrollTop = messages.scrollHeight;
+            })
+            .catch(function() {
+                botMessage.textContent = 'Ошибка связи. Попробуйте позже.';
+                messages.scrollTop = messages.scrollHeight;
+            });
+    });
+})();
+</script>

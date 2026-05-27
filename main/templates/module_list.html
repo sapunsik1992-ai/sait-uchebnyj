@@ -101,7 +101,7 @@
             {% for module in modules %}
                 <a href="{% url 'module_detail' module.id %}" class="module-card">
                     <div class="module-card-icon">
-                        <img src="{% static 'main/module-icon.webp' %}" alt="{{ module.title }}">
+                        <img src="{% if module.icon %}{{ module.icon.url }}{% else %}{% static 'main/module-icon.webp' %}{% endif %}" alt="{{ module.title }}">
                     </div>
                     <div class="module-card-content">
                         <div class="module-card-title">{{ module.title }}</div>
@@ -112,6 +112,12 @@
         </div>
     </div>
 
+    {% include 'assistant_widget.html' %}
+
+    <div class="page-actions" style="max-width: 1200px; margin: 20px auto; display: flex; gap: 12px; justify-content: center;">
+        <a href="{{ admin_url }}" class="page-action-button">Админка</a>
+        <a href="{{ assistant_url }}" class="page-action-button">Помощник</a>
+    </div>
     <footer>
         <p>&copy; 2026 Учебный портал. Все права защищены.</p>
     </footer>

@@ -113,7 +113,7 @@
     </style>
 </head>
 <body>
-    <div class="header" {% if module.header_image %}style="background-image: linear-gradient(rgba(26, 26, 46, 0.75), rgba(26, 26, 46, 0.75)), url('{{ module.header_image }}'); background-size: cover; background-position: center;"{% endif %}>
+    <div class="header" {% if module.header_image %}style="background-image: linear-gradient(rgba(26, 26, 46, 0.75), rgba(26, 26, 46, 0.75)), url('{{ module.header_image.url }}'); background-size: cover; background-position: center;"{% endif %}>
         <h1>{{ module.title }}</h1>
         <p>{{ module.description }}</p>
         <a href="{% url 'module_list' %}" class="back-link">← Назад к модулям</a>
@@ -127,18 +127,28 @@
             </div>
         {% endif %}
         <h2 style="text-align: center; margin-bottom: 30px;">Темы модуля</h2>
-        <div class="topics-list">
-            {% for topic in module.topics %}
-                <a href="{% url 'topic_detail' module.id topic.id %}" class="topic-card">
-                    <h3>{{ topic.title }}</h3>
-                    <p>{{ topic.description }}</p>
-                    <p style="margin-top: 10px; font-style: italic; color: #3498db;">
-                        → Перейти к теме
-                    </p>
-                </a>
-            {% endfor %}
-        </div>
+        {% if topics %}
+            <div class="topics-list">
+                {% for topic in topics %}
+                    <a href="{% url 'topic_detail' module.id topic.id %}" class="topic-card">
+                        <h3>{{ topic.title }}</h3>
+                        <p>{{ topic.description }}</p>
+                        <p style="margin-top: 10px; font-style: italic; color: #3498db;">
+                            → Перейти к теме
+                        </p>
+                    </a>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p style="text-align: center; color: #555;">В этом модуле ещё нет тем. Добавьте тему в админке.</p>
+        {% endif %}
     </div>
+
+    <div class="page-actions" style="max-width: 1000px; margin: 20px auto; display: flex; gap: 12px; justify-content: center;">
+        <a href="{{ admin_url }}" class="page-action-button">Админка</a>
+        <a href="{{ assistant_url }}" class="page-action-button">Помощник</a>
+    </div>
+    {% include 'assistant_widget.html' %}
 
     <footer>
         <p>&copy; 2026 Учебный портал. Все права защищены.</p>
