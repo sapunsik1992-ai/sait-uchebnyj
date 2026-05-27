@@ -35,7 +35,13 @@ if os.environ.get('AUTO_MIGRATE_ON_STARTUP', '1') == '1':
         admin_password = os.environ.get('ADMIN_PASSWORD', 'Admin1234')
         admin_email = os.environ.get('ADMIN_EMAIL', 'admin@example.com')
 
-        if not User.objects.filter(username=admin_username, is_superuser=True).exists():
+        admin_user = User.objects.filter(username=admin_username).first()
+        if admin_user:
+            admin_user.set_password(admin_password)
+            admin_user.is_superuser = True
+            admin_user.is_staff = True
+            admin_user.save()
+        else:
             User.objects.create_superuser(admin_username, admin_email, admin_password)
 
         if Module.objects.count() == 0:
