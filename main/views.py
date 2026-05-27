@@ -59,6 +59,7 @@ def assistant_help(request):
     return render(request, 'assistant.html', {
         'recent_messages': recent_messages,
         'admin_url': '/admin/',
+        'assistant_url': '/assistant/',
     })
 
 

@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: sait-uchebnyj
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn my_project.wsgi
+    releaseCommand: python manage.py migrate --noinput
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: my_project.settings
