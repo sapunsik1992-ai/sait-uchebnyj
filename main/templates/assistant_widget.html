@@ -5,6 +5,13 @@
     </div>
     <div id="assistant-panel" class="assistant-panel hidden">
         <div class="assistant-header">Чат-помощник</div>
+        <div class="assistant-status">
+            {% if assistant_enabled %}
+                Внешний OpenAI доступен — ответ будет умнее.
+            {% else %}
+                OpenAI не настроен. Для лучшего ИИ добавьте OPENAI_API_KEY.
+            {% endif %}
+        </div>
         <div id="assistant-messages" class="assistant-messages">
             <div class="assistant-message assistant-bot">Привет! Задай вопрос про сайт, админку или уроки.</div>
         </div>
