@@ -7,9 +7,9 @@
         <div class="assistant-header">Чат-помощник</div>
         <div class="assistant-status">
             {% if assistant_enabled %}
-                Внешний OpenAI доступен — ответ будет умнее.
+                Внешний HuggingFace доступен — ответ будет умнее.
             {% else %}
-                OpenAI не настроен. Для лучшего ИИ добавьте OPENAI_API_KEY.
+                HuggingFace не настроен. Для лучшего ИИ добавьте OPENAI_API_KEY.
             {% endif %}
         </div>
         <div id="assistant-messages" class="assistant-messages">

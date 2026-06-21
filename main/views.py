@@ -21,7 +21,7 @@ def get_common_context():
     return {
         'admin_url': '/admin/',
         'assistant_url': '/assistant/',
-        'assistant_enabled': bool(os.environ.get('OPENAI_API_KEY')),
+        'assistant_enabled': bool(os.environ.get('HUGGINGFACE_API_KEY')),
     }
 
 
@@ -87,33 +87,45 @@ def assistant_api(request):
 
 def get_assistant_answer(question):
     text = question.strip()
-    api_key = os.environ.get('OPENAI_API_KEY')
+    api_key = os.environ.get('HUGGINGFACE_API_KEY')
     if api_key and text:
         try:
-            return call_openai_assistant(text, api_key)
+            return call_huggingface_assistant(text, api_key)
         except Exception:
             return get_local_assistant_answer(text, external_disabled=False)
     return get_local_assistant_answer(text, external_disabled=not bool(api_key))
 
 
-def call_openai_assistant(question, api_key):
-    url = 'https://api.openai.com/v1/chat/completions'
+def call_huggingface_assistant(question, api_key):
+    """Вызывает HuggingFace API для получения ответа"""
+    url = 'https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.3/v1/chat/completions'
     headers = {
         'Content-Type': 'application/json',
         'Authorization': f'Bearer {api_key}',
     }
+    
     data = {
-        'model': 'gpt-3.5-turbo',
+        'model': 'mistralai/Mistral-7B-Instruct-v0.3',
         'messages': [
-            {'role': 'system', 'content': 'Ты помогаешь пользователю с сайтом учебного портала и админкой Django.'},
+            {
+                'role': 'system',
+                'content': '''Ты - полезный AI-помощник для учебного портала на Django.
+
+Твоя задача:
+1. Помогать пользователю с редактированием сайта через админку Django
+2. Помогать в обучении Python - объяснять код, концепции, ошибки
+3. Давать советы по структуре модулей и тем
+
+Всегда отвечай на русском языке. Будь кратким, но полезным. Если нужно показать код - используй форматирование.'''
+            },
             {'role': 'user', 'content': question},
         ],
         'temperature': 0.7,
-        'max_tokens': 400,
+        'max_tokens': 1024,
     }
-    request = Request(url, data=json.dumps(data).encode('utf-8'), headers=headers)
+    request_obj = Request(url, data=json.dumps(data).encode('utf-8'), headers=headers)
     try:
-        response = urlopen(request, timeout=15)
+        response = urlopen(request_obj, timeout=30)
         response_data = json.loads(response.read().decode('utf-8'))
         return response_data['choices'][0]['message']['content'].strip()
     except HTTPError as exc:
@@ -121,14 +133,14 @@ def call_openai_assistant(question, api_key):
             body = exc.read().decode('utf-8')
         except Exception:
             body = '<no response body>'
-        logger.error('OpenAI HTTPError %s: %s', exc.code, body)
-        return 'Не удалось подключиться к внешнему помощнику. Использую локальный режим.'
+        logger.error('HuggingFace HTTPError %s: %s', exc.code, body)
+        return 'Не удалось подключиться к AI-помощнику. Использую локальный режим.'
     except URLError as exc:
-        logger.error('OpenAI URLError: %s', exc)
-        return 'Сеть недоступна. Использую локальный помощник.'
+        logger.error('HuggingFace URLError: %s', exc)
+        return 'Нет подключения к HuggingFace API. Проверьте интернет-соединение или настройки прокси.'
     except Exception as exc:
-        logger.exception('OpenAI request failed')
-        return 'Ошибка внешнего AI. Использую локальный помощник.'
+        logger.exception('HuggingFace request failed')
+        return 'Ошибка AI-помощника. Использую локальный режим.'
 
 
 def get_local_assistant_answer(question, external_disabled=True):
@@ -136,33 +148,50 @@ def get_local_assistant_answer(question, external_disabled=True):
     if not text:
         if external_disabled:
             return ('Напишите ваш вопрос, и я постараюсь помочь. Эта версия работает локально. ' 
-                    'Для умного внешнего ИИ добавьте переменную окружения OPENAI_API_KEY.')
+                    'Для умного AI-помощника добавьте переменную окружения HUGGINGFACE_API_KEY.')
         return 'Напишите ваш вопрос, и я постараюсь помочь с админкой или учебным содержанием.'
+    
+    # Правила для админки
     if 'модул' in text or 'тема' in text or 'курс' in text:
-        return ('Чтобы открыть модуль, нажмите на карточку модуля на главной странице. ' 
+        return ('Чтобы открыть модуль, нажмите на карточку модуля на главной странице. '
                 'Внутри модуля выберите тему, чтобы увидеть содержимое, презентации и иллюстрации.')
+    
     if 'админ' in text or 'admin' in text or 'панел' in text:
-        return ('Админка доступна по адресу /admin/. Она нужна только для редактирования. ' 
+        return ('Админка доступна по адресу /admin/. Она нужна только для редактирования. '
                 'Основной сайт открыт всем, а админка — только вам.')
+    
     if 'создать пользователя' in text or 'супер' in text or 'superuser' in text:
-        return ('Суперпользователь создаётся автоматически при первом запуске. ' 
+        return ('Суперпользователь создаётся автоматически при первом запуске. '
                 'Вход по логину admin и паролю Admin1234, если вы не меняли учётные данные.')
+    
     if 'добавить тему' in text or 'новая тема' in text:
-        return ('В админке откройте нужный модуль и в конце списка тем нажмите "Добавить ещё одну тему". ' 
+        return ('В админке откройте нужный модуль и в конце списка тем нажмите "Добавить ещё одну тему". '
                 'Заполните название, описание и текст урока, затем сохраните.')
+    
     if 'презентац' in text or 'файл' in text or 'ppt' in text:
-        return ('В теме можно прикрепить презентацию через раздел "Presentations". ' 
+        return ('В теме можно прикрепить презентацию через раздел "Presentations". '
                 'Нажмите "Добавить" и загрузите файл в формате PDF или PPTX.')
+    
     if 'изображ' in text or 'картин' in text:
-        return ('Иллюстрации добавляются через раздел "Topic images" в админке темы. ' 
+        return ('Иллюстрации добавляются через раздел "Topic images" в админке темы. '
                 'Загрузите картинку и укажите подпись, чтобы она отображалась в уроке.')
+    
     if 'учеб' in text or 'как учить' in text or 'практик' in text:
-        return ('Читать материал и сразу повторять примеры — лучший способ. ' 
+        return ('Читать материал и сразу повторять примеры — лучший способ. '
                 'Пробуйте запускать команды, писать небольшой код и проверять результат прямо на сайте.')
+    
+    if 'python' in text or 'код' in text or 'функци' in text or 'переменн' in text:
+        return ('Я могу помочь с Python! Задайте вопрос про код, функции, списки, словари или любую другую тему. '
+                'Например: "как сделать цикл", "что такое list comprehension", "как обработать ошибку"')
+    
+    if 'django' in text or 'модель' in text or 'миграц' in text:
+        return ('Я помогу с Django! Спросите про модели, админку, миграции или любую другую тему фреймворка.')
+    
     if external_disabled:
-        return ('Я пока локальный помощник сайта и могу давать общие советы. ' 
-                'Для более умного ответа нужно установить OPENAI_API_KEY в настройках Render.')
-    return ('Я работаю на внешнем OpenAI. Задайте вопрос про сайт, админку или модули, и я постараюсь ответить как эксперт.')
+        return ('Я пока локальный помощник сайта и могу давать общие советы. '
+                'Для более умного ответа нужно установить HUGGINGFACE_API_KEY в настройках Render.')
+    
+    return ('Я работаю на HuggingFace AI (Mistral-7B). Задайте вопрос про сайт, админку, Python или Django, и я постараюсь ответить как эксперт.')
 
 
 def product(request):
