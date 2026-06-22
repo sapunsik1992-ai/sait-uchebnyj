@@ -1,19 +1,13 @@
+<!-- 🚀 AI-ПОМОЩНИК (ЛОКАЛЬНЫЙ РЕЖИМ) -->
 <div id="assistant-widget" class="assistant-widget">
     <div class="assistant-handle">
-        <span>Помощник</span>
+        <span>🤖 ИИ-помощник</span>
         <button id="assistant-toggle" type="button">💬</button>
     </div>
     <div id="assistant-panel" class="assistant-panel hidden">
         <div class="assistant-header">Чат-помощник</div>
-        <div class="assistant-status">
-            {% if assistant_enabled %}
-                Внешний HuggingFace доступен — ответ будет умнее.
-            {% else %}
-                HuggingFace не настроен. Для лучшего ИИ добавьте OPENAI_API_KEY.
-            {% endif %}
-        </div>
         <div id="assistant-messages" class="assistant-messages">
-            <div class="assistant-message assistant-bot">Привет! Задай вопрос про сайт, админку или уроки.</div>
+            <div class="assistant-message assistant-bot">Привет! Я — ИИ-помощник. Спроси меня что-нибудь 😊</div>
         </div>
         <form id="assistant-form" class="assistant-form">
             <input id="assistant-input" type="text" placeholder="Напиши вопрос..." autocomplete="off" />
@@ -21,27 +15,29 @@
         </form>
     </div>
 </div>
+
 <style>
     .assistant-widget {
         position: fixed;
         right: 20px;
         bottom: 20px;
         z-index: 9999;
-        width: 320px;
+        width: 360px;
         max-width: calc(100% - 40px);
-        font-family: Arial, sans-serif;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
     .assistant-handle {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        background: #1a1a2e;
+        background: linear-gradient(135deg, #4F46E5, #7C3AED);
         color: white;
         padding: 12px 16px;
         border-radius: 16px;
         cursor: pointer;
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
     }
+    .assistant-handle:hover { transform: scale(1.02); transition: transform 0.2s; }
     .assistant-panel {
         margin-top: 10px;
         background: white;
@@ -50,7 +46,8 @@
         box-shadow: 0 14px 40px rgba(0, 0, 0, 0.18);
         display: flex;
         flex-direction: column;
-        height: 420px;
+        height: 480px;
+        max-height: 80vh;
     }
     .assistant-panel.hidden {
         display: none;
@@ -72,13 +69,14 @@
         padding: 12px 14px;
         border-radius: 14px;
         line-height: 1.5;
+        word-wrap: break-word;
     }
     .assistant-bot {
         background: #e8f0ff;
         color: #1a1a2e;
     }
     .assistant-user {
-        background: #1a1a2e;
+        background: linear-gradient(135deg, #4F46E5, #7C3AED);
         color: white;
         align-self: flex-end;
     }
@@ -105,12 +103,21 @@
         padding: 10px 16px;
         cursor: pointer;
         font-weight: bold;
+        transition: background 0.2s;
     }
     .assistant-form button:hover {
         background: #2c81b7;
     }
+    .assistant-form button:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+    }
 </style>
+
 <script>
+// ───────────────────────────────────────────
+// Логика работы виджета (ЛОКАЛЬНЫЙ РЕЖИМ)
+// ───────────────────────────────────────────
 (function() {
     var panel = document.getElementById('assistant-panel');
     var toggle = document.getElementById('assistant-toggle');
@@ -122,6 +129,16 @@
         return;
     }
 
+    function toggleModal(show) {
+        panel.classList.toggle('hidden');
+        if (show) input.focus();
+    }
+
+    toggle.addEventListener('click', function() {
+        toggleModal(true);
+    });
+
+    // Функция получения CSRF-токена
     function getCookie(name) {
         var cookieValue = null;
         if (document.cookie && document.cookie !== '') {
@@ -137,16 +154,12 @@
         return cookieValue;
     }
 
-    toggle.addEventListener('click', function() {
-        panel.classList.toggle('hidden');
-    });
-
     form.addEventListener('submit', function(event) {
         event.preventDefault();
         var text = input.value.trim();
-        if (!text) {
-            return;
-        }
+        if (!text) return;
+
+        // Добавляем сообщение пользователя
         var userMessage = document.createElement('div');
         userMessage.className = 'assistant-message assistant-user';
         userMessage.textContent = text;
@@ -154,31 +167,43 @@
         messages.scrollTop = messages.scrollHeight;
         input.value = '';
 
+        // Показываем загрузку
         var botMessage = document.createElement('div');
         botMessage.className = 'assistant-message assistant-bot';
-        botMessage.textContent = 'Думаю...';
+        botMessage.textContent = '⏳ Ищу ответ...';
         messages.appendChild(botMessage);
         messages.scrollTop = messages.scrollHeight;
+
+        // Отправляем запрос к локальному бэкенду
+        var csrftoken = getCookie('csrftoken');
+        var formData = new URLSearchParams();
+        formData.append('question', text);
 
         fetch('/assistant/api/', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
-                'X-CSRFToken': getCookie('csrftoken')
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': csrftoken || ''
             },
-            body: 'question=' + encodeURIComponent(text)
+            body: formData.toString()
         })
-            .then(function(response) {
-                return response.json();
-            })
-            .then(function(data) {
-                botMessage.textContent = data.answer;
-                messages.scrollTop = messages.scrollHeight;
-            })
-            .catch(function() {
-                botMessage.textContent = 'Ошибка связи. Попробуйте позже.';
-                messages.scrollTop = messages.scrollHeight;
-            });
+        .then(function(response) {
+            if (!response.ok) {
+                throw new Error('Ошибка связи. Попробуйте позже.');
+            }
+            return response.json();
+        })
+        .then(function(data) {
+            var answer = data.answer || 'ИИ не дал ответ.';
+            botMessage.textContent = answer;
+            messages.scrollTop = messages.scrollHeight;
+        })
+        .catch(function(error) {
+            console.error('Assistant error:', error);
+            botMessage.textContent = '❌ Ошибка связи. Попробуйте позже.';
+            messages.scrollTop = messages.scrollHeight;
+        });
     });
 })();
 </script>
+<!-- 🚀 КОНЕЦ: AI-ПОМОЩНИК -->
