@@ -137,7 +137,7 @@ def call_huggingface_assistant(question, api_key):
         return 'Не удалось подключиться к AI-помощнику. Использую локальный режим.'
     except URLError as exc:
         logger.error('HuggingFace URLError: %s', exc)
-        return 'Нет подключения к HuggingFace API. Проверьте интернет-соединение или настройки прокси.'
+        return f'Нет подключения к HuggingFace API. Ошибка: {exc}. Проверьте интернет-соединение.'
     except Exception as exc:
         logger.exception('HuggingFace request failed')
         return 'Ошибка AI-помощника. Использую локальный режим.'
